@@ -12,12 +12,15 @@ class FirstChallenge
     public:
         FirstChallenge();
         void process();
+        int i;
+        int j;
 
     private:
         void odometry_callback(const nav_msgs::Odometry::ConstPtr&);
         void laser_callback(const sensor_msgs::LaserScan::ConstPtr&);
 
         void run();
+        void run_2();
         void show_odom();
         void show_scan();
 

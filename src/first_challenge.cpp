@@ -22,11 +22,8 @@ void FirstChallenge::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 void FirstChallenge::run()
 {
     cmd_vel_.mode = 11;
-    cmd_vel_.cntl.linear.x = 0.5;
-    ros::Duration(2.0).sleep();
-    cmd_vel_.cntl.angular.z = M_PI;
-    ros::Duration(2.0).sleep();
-
+    //std::cout<<odometry_.pose.pose.position.x<<","<<odometry_.pose.pose.position.y<<std::endl;
+    cmd_vel_.cntl.linear.x = 0.05;
     pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
 }
 
@@ -66,7 +63,7 @@ void FirstChallenge::show_scan()
     }
 
     if(range_min <= 1.00){
-        return 0;
+        cmd_vel_.cntl.linear.x = 0.0;
     }
     // ROS_INFO_STREAM("scan: min: %f", range_min);
     std::cout << "scan: min:" << range_min << std::endl; //std::coutターミナルに表示
@@ -76,16 +73,19 @@ void FirstChallenge::show_scan()
 void FirstChallenge::process()
 {
     ros::Rate loop_rate(hz_);   //ループ頻度の設定　最後にRate::sleep()を呼び出してからどれだけ経過したか常に管理し、正確な時間になるまでスリープする。
-
-    run();                  //run&spin
-
     while(ros::ok())        //while(ros::ok())無限ループ
         //ros::ok()はノードの終了指示が与えられたときにループを抜けて終了処理を行う。
     {
-        run_2();            //run
+        ros::spinOnce();
+        while(sqrt((odometry_.pose.pose.position.x * odometry_.pose.pose.position.x)+(odometry_.pose.pose.position.y * odometry_.pose.pose.position.y))<= 1.0){
+            run();            //run
+            ros::spinOnce();
+        }
+        cmd_vel_.cntl.linear.x = 0.0;
+        pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
         show_odom();        //odometry表示
         show_scan();        //laser min data入手
-        ros::spinOnce();    //spinOnce()
+        //ros::spinOnce();    //spinOnce()
         loop_rate.sleep();  //ros::Rateオブジェクトをhz_の発信で行えるように残り時間をスリープするために使う。
     }
 }

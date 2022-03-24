@@ -20,10 +20,17 @@ class FirstChallenge
         void laser_callback(const sensor_msgs::LaserScan::ConstPtr&);
 
         void run();
-        void run_2();
+        void run_2(double theta);
         void show_odom();
         void show_scan();
 
+        double odometry_x;
+        double odometry_y;
+        double theta;
+
+        double range_min;
+        double range_upper_limit;
+        int range_size;
         int hz_;
 
         nav_msgs::Odometry odometry_;

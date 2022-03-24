@@ -27,25 +27,32 @@ void FirstChallenge::run()
     pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
 }
 
-void FirstChallenge::run_2()
+void FirstChallenge::run_2(double theta)
 {
     cmd_vel_.mode = 11;
-    cmd_vel_.cntl.linear.x = 0.5;
+    cmd_vel_.cntl.linear.z = M_PI;
+    pub_cmd_vel_.publish(cmd_vel_);
+
+    theta += atan((odometry_.pose.pose.position.x - odometry_x)/(odometry_.pose.pose.position.y - odometry_y));
+    odometry_x = odometry_.pose.pose.position.x;
+    odometry_y = odometry_.pose.pose.position.y;
+
 }
 
 void FirstChallenge::show_odom()        //ルンバの速度と位置がわかる
 {
     // ROS_INFO_STREAM("odom: x: %f, y: %f, z: %f", odometry_.pose.pose.position.x, odometry_.pose.pose.position.y, odometry_.pose.pose.position.z);
-    std::cout << "odom" << ": x:" << odometry_.pose.pose.position.x
-        << " y:" <<  odometry_.pose.pose.position.y
-        << " z:" <<  odometry_.pose.pose.position.z << std::endl;
+    //std::cout << "odom" << ": x:" << odometry_.pose.pose.position.x
+        //<< " y:" <<  odometry_.pose.pose.position.y
+        //<< " z:" <<  odometry_.pose.pose.position.z << std::endl;
 }
 
 void FirstChallenge::show_scan()
 {
-    float range_min = 1e6;                              //下から1番目　1e6=1000000
-    float range_upper_limit = 0;                        //上限値
-    float laser_ranges[laser_.ranges.size()];            //
+    range_min = 1e6;                              //下から1番目　1e6=1000000
+    range_upper_limit = 0;                        //上限値
+    range_size = laser_.ranges.size();
+    double laser_ranges[range_size];            //
     for (int i = 0; i < laser_.ranges.size(); i++) {    //.sizeは配列の個数
         if (laser_ranges[i] < range_min) {
             range_min = laser_ranges[i];
@@ -83,7 +90,14 @@ void FirstChallenge::process()
         }
         cmd_vel_.cntl.linear.x = 0.0;
         pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
-        show_odom();        //odometry表示
+
+        while(theta >= 2*M_PI){
+            run_2(theta);
+            ros::spinOnce();
+        }
+        cmd_vel_.cntl.angular.z = 0.0;
+        pub_cmd_vel_.publish(cmd_vel_);
+
         show_scan();        //laser min data入手
         //ros::spinOnce();    //spinOnce()
         loop_rate.sleep();  //ros::Rateオブジェクトをhz_の発信で行えるように残り時間をスリープするために使う。

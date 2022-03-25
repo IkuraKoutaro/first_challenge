@@ -19,7 +19,7 @@ void FirstChallenge::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
     laser_ = *msg;
 }
 
-void FirstChallenge::run()
+void FirstChallenge::run()          //直進
 {
     cmd_vel_.mode = 11;
     //std::cout<<odometry_.pose.pose.position.x<<","<<odometry_.pose.pose.position.y<<std::endl;
@@ -27,15 +27,26 @@ void FirstChallenge::run()
     pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
 }
 
-void FirstChallenge::run_2(double theta)
+void FirstChallenge::run_2(double theta)    //回転
 {
     cmd_vel_.mode = 11;
-    cmd_vel_.cntl.linear.z = M_PI;
+    cmd_vel_.cntl.angular.z = M_PI/4;
     pub_cmd_vel_.publish(cmd_vel_);
 
-    theta += atan((odometry_.pose.pose.position.x - odometry_x)/(odometry_.pose.pose.position.y - odometry_y));
-    odometry_x = odometry_.pose.pose.position.x;
-    odometry_y = odometry_.pose.pose.position.y;
+    double q0q3 = odometry_.pose.pose.orientation.x * odometry_.pose.pose.orientation.w;
+    double q1q2 = odometry_.pose.pose.orientation.y * odometry_.pose.pose.orientation.z;
+    double q0q0 = odometry_.pose.pose.orientation.x * odometry_.pose.pose.orientation.x;
+    double q1q1 = odometry_.pose.pose.orientation.y * odometry_.pose.pose.orientation.y;
+    double q2q2 = odometry_.pose.pose.orientation.z * odometry_.pose.pose.orientation.z;
+    double q3q3 = odometry_.pose.pose.orientation.w * odometry_.pose.pose.orientation.w;
+
+    double yaw = atan((2*(q0q3 + q1q2))/(q0q0 + q1q1 - q2q2 - q3q3));
+
+    std::cout<<yaw<<std::endl;
+
+    //theta += atan((odometry_.pose.pose.position.x - odometry_x)/(odometry_.pose.pose.position.y - odometry_y));
+    //odometry_x = odometry_.pose.pose.position.x;
+    //odometry_y = odometry_.pose.pose.position.y;*/
 
 }
 
@@ -88,10 +99,12 @@ void FirstChallenge::process()
             run();            //run
             ros::spinOnce();
         }
+
+        std::cout << "a" << std::endl;
         cmd_vel_.cntl.linear.x = 0.0;
         pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
 
-        while(theta >= 2*M_PI){
+        while(theta <= 2*M_PI){
             run_2(theta);
             ros::spinOnce();
         }

@@ -20,7 +20,7 @@ class FirstChallenge
         void laser_callback(const sensor_msgs::LaserScan::ConstPtr&);
 
         void run();
-        void run_2(double theta);
+        void run_2(double* theta);
         void show_odom();
         void show_scan();
 

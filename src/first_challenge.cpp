@@ -27,7 +27,7 @@ void FirstChallenge::run()          //直進
     pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
 }
 
-void FirstChallenge::run_2(double theta)    //回転
+void FirstChallenge::run_2(double* theta)    //回転
 {
     cmd_vel_.mode = 11;
     cmd_vel_.cntl.angular.z = M_PI/4;
@@ -40,9 +40,9 @@ void FirstChallenge::run_2(double theta)    //回転
     double q2q2 = odometry_.pose.pose.orientation.z * odometry_.pose.pose.orientation.z;
     double q3q3 = odometry_.pose.pose.orientation.w * odometry_.pose.pose.orientation.w;
 
-    double yaw = atan((2*(q0q3 + q1q2))/(q0q0 + q1q1 - q2q2 - q3q3));
+    *theta = atan((2*(q0q3 + q1q2))/(q0q0 + q1q1 - q2q2 - q3q3));
 
-    std::cout<<yaw<<std::endl;
+    std::cout<<theta<<std::endl;
 
     //theta += atan((odometry_.pose.pose.position.x - odometry_x)/(odometry_.pose.pose.position.y - odometry_y));
     //odometry_x = odometry_.pose.pose.position.x;
@@ -105,7 +105,7 @@ void FirstChallenge::process()
         pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
 
         while(theta <= 2*M_PI){
-            run_2(theta);
+            run_2(&theta);
             ros::spinOnce();
         }
         cmd_vel_.cntl.angular.z = 0.0;

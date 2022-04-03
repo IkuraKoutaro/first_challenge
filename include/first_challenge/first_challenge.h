@@ -20,13 +20,19 @@ class FirstChallenge
         void laser_callback(const sensor_msgs::LaserScan::ConstPtr&);
 
         void run();
-        void run_2(double* theta);
+        void run_2();
         void show_odom();
         void show_scan();
+        void VetQuaternionMsg(double roll, double pitch, double yaw, geometry_msgs::Quaternion &q);
 
         double odometry_x;
         double odometry_y;
-        double theta;
+        double yaw;
+        double old_yaw;
+        double r;
+        double p;
+        double y;
+        double count;
 
         double range_min;
         double range_upper_limit;

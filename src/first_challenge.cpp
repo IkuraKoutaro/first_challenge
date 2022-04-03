@@ -34,34 +34,9 @@ void VetQuaternionMsg(double roll, double pitch, double yaw, geometry_msgs::Quat
 
 void FirstChallenge::run_2()    //回転
 {
-
     cmd_vel_.mode = 11;
     cmd_vel_.cntl.angular.z = M_PI/8;
     pub_cmd_vel_.publish(cmd_vel_);
-/*
-    double q0q3 = odometry_.pose.pose.orientation.x * odometry_.pose.pose.orientation.w;
-    double q1q2 = odometry_.pose.pose.orientation.y * odometry_.pose.pose.orientation.z;
-    double q0q0 = odometry_.pose.pose.orientation.x * odometry_.pose.pose.orientation.x;
-    double q1q1 = odometry_.pose.pose.orientation.y * odometry_.pose.pose.orientation.y;
-    double q2q2 = odometry_.pose.pose.orientation.z * odometry_.pose.pose.orientation.z;
-    double q3q3 = odometry_.pose.pose.orientation.w * odometry_.pose.pose.orientation.w;
-
-    double dyaw = 2*acos(odometry_.pose.pose.orientation.w) - old_yaw;
-    old_yaw = 2*acos(odometry_.pose.pose.orientation.w);
-
-    //*yaw += atan((2*(q0q3 + q1q2))/(q0q0 + q1q1 - q2q2 - q3q3));
-
-    *yaw += dyaw;
-    std::cout<<*yaw<<std::endl;
-
-    tf::Quaternion quat;
-    tf::Matrix3x3(quat).getRPY(r, p, y);
-*/
-    //theta += atan((odometry_.pose.pose.position.x - odometry_x)/(odometry_.pose.pose.position.y - odometry_y));
-    //odometry_x = odometry_.pose.pose.position.x;
-    //odometry_y = odometry_.pose.pose.position.y;*/
-
-    //std::cout<<"yaw="<<y<<std::endl;
 }
 
 void FirstChallenge::show_odom()        //ルンバの速度と位置がわかる
@@ -112,20 +87,15 @@ void FirstChallenge::process()
         ros::spinOnce();
 
         while(sqrt((odometry_.pose.pose.position.x * odometry_.pose.pose.position.x)+(odometry_.pose.pose.position.y * odometry_.pose.pose.position.y))<= 1.0){
-            run();            //run
+            run();
             ros::spinOnce();
         }
-
-        //std::cout << "a" << std::endl;
         cmd_vel_.cntl.linear.x = 0.0;
         pub_cmd_vel_.publish(cmd_vel_);     //nodeに情報送る(roomba)
-
 
         count = 0;
 
         while(){
-            //VetQuaternionMsg(roll, pitch, yaw, geometry_msgs::Quaternion &q);
-
             tf::Quaternion quat(odometry_.pose.pose.orientation.x, odometry_.pose.pose.orientation.y, odometry_.pose.pose.orientation.z, odometry_.pose.pose.orientation.w);
             tf::Matrix3x3(quat).getRPY(r, p, y);
 
@@ -137,8 +107,8 @@ void FirstChallenge::process()
         cmd_vel_.cntl.angular.z = 0.0;
         pub_cmd_vel_.publish(cmd_vel_);
 
-        //show_scan();        //laser min data入手
-        ros::spinOnce();    //spinOnce()
+        show_scan();      //laser min data入手
+        ros::spinOnce();
         loop_rate.sleep();  //ros::Rateオブジェクトをhz_の発信で行えるように残り時間をスリープするために使う。
     }
 }

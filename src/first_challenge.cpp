@@ -95,17 +95,22 @@ void FirstChallenge::process()
 
         count = 0;
 
-        while(){
+        while(!(count>0 && y>0)){
             tf::Quaternion quat(odometry_.pose.pose.orientation.x, odometry_.pose.pose.orientation.y, odometry_.pose.pose.orientation.z, odometry_.pose.pose.orientation.w);
             tf::Matrix3x3(quat).getRPY(r, p, y);
 
             run_2();
             ros::spinOnce();
 
+            if(y<(-M_PI/2)){
+                count++;
+            }
             std::cout<<"yaw="<<y<<std::endl;
         }
         cmd_vel_.cntl.angular.z = 0.0;
         pub_cmd_vel_.publish(cmd_vel_);
+
+
 
         show_scan();      //laser min data入手
         ros::spinOnce();

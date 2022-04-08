@@ -22,7 +22,7 @@ class FirstChallenge
         void run();
         void run_2();
         void show_odom();
-        void show_scan();
+        bool show_scan();
         void VetQuaternionMsg(double roll, double pitch, double yaw, geometry_msgs::Quaternion &q);
 
         double odometry_x;
